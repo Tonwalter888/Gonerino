@@ -6,9 +6,17 @@
 - (NSArray<NSNumber *> *)orderedCategories {
     if (self.type != 1)
         return %orig;
-    NSMutableArray *mutableCategories = %orig.mutableCopy;
-    [mutableCategories insertObject:@(GonerinoSection) atIndex:0];
-    return mutableCategories.copy;
+
+    NSArray *orig = %orig;
+    if (!orig)
+        return orig;
+
+    NSMutableArray *mutableCategories = [orig mutableCopy];
+    // Prevent duplicate insertion
+    if (![mutableCategories containsObject:@(GonerinoSection)]) {
+        [mutableCategories insertObject:@(GonerinoSection) atIndex:0];
+    }
+    return mutableCategories;
 }
 
 %end
@@ -16,13 +24,19 @@
 %hook YTAppSettingsPresentationData
 
 + (NSArray *)settingsCategoryOrder {
-    NSArray *order               = %orig;
-    NSMutableArray *mutableOrder = [order mutableCopy];
-    NSUInteger insertIndex       = [order indexOfObject:@(1)];
-    if (insertIndex != NSNotFound) {
-        [mutableOrder insertObject:@(GonerinoSection) atIndex:insertIndex + 1];
+    NSMutableArray *order = [%orig mutableCopy];
+    // Already present? Do nothing.
+    if ([order containsObject:@(GonerinoSection)]) {
+        return order;
     }
-    return mutableOrder;
+
+    NSUInteger idx = [order indexOfObject:@(1)];
+    if (idx != NSNotFound) {
+        [order insertObject:@(GonerinoSection) atIndex:idx + 1];
+    } else {
+        [order addObject:@(GonerinoSection)];
+    }
+    return order;
 }
 
 %end
