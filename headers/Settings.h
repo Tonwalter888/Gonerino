@@ -62,4 +62,20 @@ static BOOL isImportOperation = NO;
 - (void)reloadGonerinoSection;
 @end
 
+%hook YTSettingsGroupData
+
+- (NSArray<NSNumber *> *)orderedCategories {
+    if (self.type != 1)
+        return %orig;
+    NSMutableArray *categories = [%orig mutableCopy];
+    // Prevent duplicate insertion
+    if (![categories containsObject:@(GonerinoSection)]) {
+        [categories insertObject:@(GonerinoSection) atIndex:0];
+    }
+
+    return categories;
+}
+
+%end
+
 NS_ASSUME_NONNULL_END
