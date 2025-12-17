@@ -1,6 +1,8 @@
 #import "Settings.h"
 #import "Util.h"
 
+static BOOL gonerinoSectionLoaded = NO;
+
 %hook YTSettingsGroupData
 
 - (NSArray<NSNumber *> *)orderedCategories {
@@ -45,8 +47,11 @@
 
 %new
 - (void)updateGonerinoSectionWithEntry:(id)entry {
+    if (gonerinoSectionLoaded)
+        return;
+    gonerinoSectionLoaded = YES;
     YTSettingsViewController *delegate = [self valueForKey:@"_settingsViewControllerDelegate"];
-    NSMutableArray *sectionItems       = [NSMutableArray array];
+    NSMutableArray *sectionItems = [NSMutableArray array];
 
     SECTION_HEADER(@"Gonerino Settings");
 
@@ -789,9 +794,12 @@
 %hook YTSettingsViewController
 
 - (void)loadWithModel:(id)model {
+    gonerinoSectionLoaded = NO; // reset
     %orig;
     if ([self respondsToSelector:@selector(updateSectionForCategory:withEntry:)]) {
-        [(YTSettingsSectionItemManager *)[self valueForKey:@"_sectionItemManager"] updateGonerinoSectionWithEntry:nil];
+        [(YTSettingsSectionItemManager *)
+            [self valueForKey:@"_sectionItemManager"]
+            updateGonerinoSectionWithEntry:nil];
     }
 }
 
