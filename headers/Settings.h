@@ -62,4 +62,4 @@ static BOOL isImportOperation = NO;
 - (void)reloadGonerinoSection;
 @end
 
-NS_ASSUME_NONNULL_EN
+NS_ASSUME_NONNULL_END
